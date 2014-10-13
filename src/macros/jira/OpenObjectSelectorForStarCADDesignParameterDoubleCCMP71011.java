@@ -9,6 +9,7 @@ package macros.jira;
 import java.awt.BorderLayout;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
+import java.util.Collections;
 import javax.swing.SwingUtilities;
 import star.base.neo.ClientServerObject;
 import star.base.query.FromQuerySelectorDescriptor;
@@ -39,8 +40,8 @@ public class OpenObjectSelectorForStarCADDesignParameterDoubleCCMP71011 extends 
     @Override
     public void execute() {
         sim = getActiveSimulation();
-        Query query = new Query(new TypePredicate(TypeOperator.Is, StarCadDesignParameterDouble.class));
-        query.setPrefilterNamedObjects(false);
+        Query query = new Query(new TypePredicate(TypeOperator.Is, StarCadDesignParameterDouble.class),
+            Collections.<Query.Modifier>emptySet());
         
         final ObjectSelectDialog dialog = new ObjectSelectDialog(query, "Select Design Parameters");
         
