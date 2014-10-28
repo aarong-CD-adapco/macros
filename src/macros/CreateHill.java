@@ -30,13 +30,13 @@ import star.common.Units;
  */
 public class CreateHill extends StarMacro {
 
-    double domainHeight = 20.0;
+    double domainHeight = 40.0;
     double preRoadLength = 5.0;
     double roadWidth = 20.0;
     double preHillWidth = 5.0;
     double hillHeight = 5.0;
     double hillWidth = 15.0;
-    double postHillLength = 45.0;
+    double postHillLength = 100.0;
     double omega = Math.PI / hillWidth;
 
     ArrayList<Double> hillVals = new ArrayList<Double>();
