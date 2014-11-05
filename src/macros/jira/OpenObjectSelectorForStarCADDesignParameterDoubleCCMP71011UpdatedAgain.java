@@ -8,14 +8,19 @@ package macros.jira;
 
 import java.awt.BorderLayout;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import javax.swing.SwingUtilities;
 import star.base.neo.ClientServerObject;
+import star.base.query.CompoundOperator;
+import star.base.query.CompoundPredicate;
 import star.base.query.FromQuerySelectorDescriptor;
 import star.base.query.Query;
+import star.base.query.QueryPredicate;
 import star.base.query.TypeOperator;
 import star.base.query.TypePredicate;
+import star.common.ScalarProfile;
 import star.common.Simulation;
 import star.common.StarMacro;
 import star.common.ui.SimulationProcessNodeManager;
@@ -33,17 +38,30 @@ import star.starcad2.StarCadDesignParameterDouble;
 /**
  *
  * @author aarong
+ * 
+ * Modified to work with 10.01.038+.
  */
-public class OpenObjectSelectorForStarCADDesignParameterDoubleCCMP71011 extends StarMacro {
+public class OpenObjectSelectorForStarCADDesignParameterDoubleCCMP71011UpdatedAgain extends StarMacro {
     Simulation sim;
     
     @Override
     public void execute() {
         sim = getActiveSimulation();
-//        Query query = new Query(new TypePredicate(TypeOperator.Is, StarCadDesignParameterDouble.class),
+        //
+        // Modified for 10.01.038+ compatibility
+        //
+//      Query query = new Query(new TypePredicate(TypeOperator.Is, StarCadDesignParameterDouble.class));
+//      query.setPrefilterNamedObjects(false);
+        ArrayList<QueryPredicate> queryPredicateList = new ArrayList<QueryPredicate>();
+        QueryPredicate scalarPros = new TypePredicate(TypeOperator.Is, ScalarProfile.class);
+        QueryPredicate starCadDPs = new TypePredicate(TypeOperator.Is, StarCadDesignParameterDouble.class);
+        queryPredicateList.add(scalarPros);
+        queryPredicateList.add(starCadDPs);
+        
+//        Query query = new Query(new CompoundPredicate(CompoundOperator.Or, queryPredicateList),
 //            Collections.<Query.Modifier>emptySet());
 //        
-//        final ObjectSelectDialog dialog = new ObjectSelectDialog(query, "Select Design Parameters");
+//        final ObjectSelectDialog dialog = new ObjectSelectDialog(query, "Select Scalar Profiels or Design Parameters");
 //        
 //        try {
 //            SwingUtilities.invokeAndWait(new Runnable(){
