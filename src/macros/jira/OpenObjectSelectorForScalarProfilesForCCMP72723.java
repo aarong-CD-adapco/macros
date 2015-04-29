@@ -41,7 +41,7 @@ import star.starcad2.StarCadDesignParameterDouble;
  * 
  * Modified to work with 10.01.038+.
  */
-public class OpenObjectSelectorForStarCADDesignParameterDoubleCCMP71011UpdatedAgain extends StarMacro {
+public class OpenObjectSelectorForScalarProfilesForCCMP72723 extends StarMacro {
     Simulation sim;
     
     @Override
