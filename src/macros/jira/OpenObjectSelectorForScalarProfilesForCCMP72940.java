@@ -9,7 +9,6 @@ package macros.jira;
 import java.awt.BorderLayout;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import javax.swing.SwingUtilities;
@@ -21,11 +20,6 @@ import star.base.query.Query;
 import star.base.query.QueryPredicate;
 import star.base.query.TypeOperator;
 import star.base.query.TypePredicate;
-import star.cadmodeler.CoordinateDesignParameter;
-import star.cadmodeler.DesignParameter;
-import star.cadmodeler.VectorQuantityDesignParameter;
-import star.common.FilterModel;
-import star.common.MeshContinuum;
 import star.common.ScalarProfile;
 import star.common.Simulation;
 import star.common.StarMacro;
@@ -39,7 +33,6 @@ import star.coremodule.ui.OkCancelSimulationDialog;
 import star.coremodule.ui.SimpleSimulationPanel;
 import star.coremodule.ui.SimulationPanel;
 import star.locale.annotation.StarDialog;
-import star.meshing.AutoMeshOperation;
 import star.starcad2.StarCadDesignParameterDouble;
 
 /**
@@ -48,19 +41,23 @@ import star.starcad2.StarCadDesignParameterDouble;
  * 
  * Modified to work with 10.01.038+.
  */
-public class OpenObjectSelectorForOptimateVariablesForCCMP72725 extends StarMacro {
+public class OpenObjectSelectorForScalarProfilesForCCMP72940 extends StarMacro {
     Simulation sim;
     
     @Override
     public void execute() {
         sim = getActiveSimulation();
 
-        ArrayList<QueryPredicate> queryPredicateList = getPredicates();
-                
+        ArrayList<QueryPredicate> queryPredicateList = new ArrayList<QueryPredicate>();
+        QueryPredicate scalarPros = new TypePredicate(TypeOperator.Is, ScalarProfile.class);
+        QueryPredicate starCadDPs = new TypePredicate(TypeOperator.Is, StarCadDesignParameterDouble.class);
+        queryPredicateList.add(scalarPros);
+        queryPredicateList.add(starCadDPs);
+        
         Query query = new Query(new CompoundPredicate(CompoundOperator.Or, queryPredicateList),
             Collections.<Query.Modifier>emptySet());
         
-        final ObjectSelectDialog dialog = new ObjectSelectDialog(query, "OptimateObjectSelector");
+        final ObjectSelectDialog dialog = new ObjectSelectDialog(query, "Select Scalar Profiels or Design Parameters");
         
         try {
             SwingUtilities.invokeAndWait(new Runnable(){
@@ -75,48 +72,6 @@ public class OpenObjectSelectorForOptimateVariablesForCCMP72725 extends StarMacr
             
         }
         
-    }
-    
-    private ArrayList<QueryPredicate> getPredicates() {
-        ArrayList<QueryPredicate> list = new ArrayList<QueryPredicate>();
-        
-        list.addAll(getDPQP());
-        list.addAll(getSPQP());
-        list.addAll(getMCQP());
-        
-        return list;        
-    }
-    
-    private ArrayList<QueryPredicate> getDPQP() {
-        ArrayList<QueryPredicate> queryPredicateList = new ArrayList<QueryPredicate>();
-        
-        QueryPredicate notVQDP = new TypePredicate(TypeOperator.IsNot, VectorQuantityDesignParameter.class);
-        QueryPredicate notCDP = new TypePredicate(TypeOperator.IsNot, CoordinateDesignParameter.class);
-        
-        for (Class c : new Class[] {DesignParameter.class}) {
-            ArrayList<QueryPredicate> list = new ArrayList<QueryPredicate>();
-            list.add(notVQDP);
-            list.add(notCDP);
-            list.add(new TypePredicate(TypeOperator.Is, c));
-            queryPredicateList.add(new CompoundPredicate(CompoundOperator.And, list));
-        }
-        return queryPredicateList;
-    }
-    
-    private ArrayList<QueryPredicate> getSPQP() {
-        ArrayList<QueryPredicate> queryPredicateList = new ArrayList<QueryPredicate>();
-        for (Class c : new Class[] {ScalarProfile.class}) {
-            queryPredicateList.add(new TypePredicate(TypeOperator.Is, c));
-        }
-        return queryPredicateList;
-    }
-    
-    private ArrayList<QueryPredicate> getMCQP() {
-        ArrayList<QueryPredicate> queryPredicateList = new ArrayList<QueryPredicate>();
-        for (Class c : new Class[] {MeshContinuum.class, AutoMeshOperation.class}) {
-            queryPredicateList.add(new TypePredicate(TypeOperator.Is, c));
-        }
-        return queryPredicateList;
     }
     
     @StarDialog(title = "StarCadDesignParameterDouble selector dialog for CCMP-71011")

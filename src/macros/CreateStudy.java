@@ -6,8 +6,10 @@
 
 package macros;
 
+import core.OptimateFile;
 import core.OptimateProperties;
 import core.Project;
+import core.apiFramework.OptimateProject;
 import parameters.Objective;
 import parameters.Response;
 import parameters.var.DesignParameterVariable;
@@ -27,6 +29,9 @@ public class CreateStudy extends StarMacro {
     @Override
     public void execute() {
         Simulation sim = getActiveSimulation();
+        
+//        OptimateProject proj = OptimateProject.newInstance(sim);
+//        proj.createStudy();
         
         OptimateProperties op = new OptimateProperties();
         Project project = new Project(sim, op, Project.UserMode.NORMAL);
