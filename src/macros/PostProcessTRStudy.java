@@ -6,6 +6,7 @@
 package macros;
 
 import java.awt.Dimension;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import star.common.StarPlot;
@@ -25,8 +26,10 @@ public class PostProcessTRStudy extends PostProcessStudyDesigns {
     public void execute() {
         try {
             getActiveSimulation();
-            setSceneResolution(new Dimension(1240, 964));
-            postProcess();
+//            setSceneResolution(new Dimension(1240, 964));
+//            save(false);
+//            postProcess();
+            save();
         } catch (Exception ex) {
             print(ex);
         }
@@ -73,6 +76,12 @@ public class PostProcessTRStudy extends PostProcessStudyDesigns {
         legend_0.setLevels(512);
         
         scalarDisplayer_0.setFillMode(1);
+    }
+    
+    private void save() {
+        for (Scene s : getSim().getSceneManager().getScenes()) {
+            s.printAndWait(getSim().getSessionDirFile().getParent() + File.separator + s.getPresentationName() + ".png", 1, 1240, 964);
+        }
     }
 
 }
