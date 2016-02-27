@@ -8,6 +8,10 @@ package macros;
 import core.PostProcess;
 import core.Project;
 import core.SolverProcess;
+import core.StarDriverInsertedMacro;
+import core.apiFramework.DesignManager;
+import core.apiFramework.InsertedMacro;
+import core.apiFramework.InsertedMacroManager;
 import core.apiFramework.LicenseManager;
 import core.apiFramework.OptimateProject;
 import core.apiFramework.OptimateStudy;
@@ -17,6 +21,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import parameters.Design;
+import parameters.DesignSet;
+import parameters.HEEDSInFile;
 import parameters.Response;
 import parameters.var.AbstractVariable;
 import star.base.report.Report;
@@ -33,7 +40,7 @@ import workers.RunManager;
  *
  * @author aarong
  */
-public class CreateStudy extends StarMacro implements ProcessStreamListener, SolverListener {
+public class CreateStudyWDesignSet extends StarMacro implements ProcessStreamListener, SolverListener {
 
     Simulation _sim;
 
@@ -45,6 +52,10 @@ public class CreateStudy extends StarMacro implements ProcessStreamListener, Sol
         OptimateStudy study = proj.getActiveStudy();
 
         study.setStudyType(OptimateStudy.StudyType.DESIGN_SWEEP);
+        
+        //Tell the study that a design set will be used to run the design sweep
+        study.designSweepUsesDesignSet(true);
+        
         study.setSaveMode(Project.HeedsSaveMode.NONE);
         study.getAnalysis().setNumJobs(3);
         study.getSimulationSettings().setNumberOfCPUsPerDesign(1);
@@ -55,17 +66,29 @@ public class CreateStudy extends StarMacro implements ProcessStreamListener, Sol
 
         AbstractVariable depth;
         depth = study.getVariableManager().createChild(getDepth());
-        depth.setOptimizationMinimum(0.05);
-        depth.setOptimizationMaximum(0.1);
-        depth.setResolution(3);
-        depth.setBaseline(0.05);
-
+        
         AbstractVariable thickness = study.getVariableManager().createChild(getThickness());
-        thickness.setOptimizationMinimum(0.005);
-        thickness.setOptimizationMaximum(0.01);
-        thickness.setResolution(3);
-        thickness.setBaseline(0.005);
+        
+        //Create design set for the design sweep
+        DesignSet designSet = study.getDesignSetManager().createChild();
+        DesignManager designs = designSet.getDesignsManager();
+        
+        Design d1 = designs.createChild();
+        d1.setValue(depth.getName(), 0.05);
+        d1.setValue(thickness.getName(), 0.005);
+        
+        Design d2 = designs.createChild();
+        d2.setValue(depth.getName(), 0.1);
+        d2.setValue(thickness.getName(), 0.01);
 
+        Design d3 = designs.createChild();
+        d3.setValue(depth.getName(), 0.125);
+        d3.setValue(thickness.getName(), 0.0125);
+        
+        //Set the design set for the study
+        study.setDesignSetForDesignSweep(designSet);
+        
+        
         Response dp = study.getResponseManager().createChild(getPressureDrop());
 
         for (Scene sc : _sim.getSceneManager().getScenes()) {
@@ -75,9 +98,15 @@ public class CreateStudy extends StarMacro implements ProcessStreamListener, Sol
         for (StarPlot sp : _sim.getPlotManager().getPlots()) {
             study.getModelViewManager().createChild(sp);
         }
+        
+        InsertedMacroManager manager = study.getInsertedMacroManager();
+        InsertedMacro macro = manager.createChild(new File(_sim.getSessionDir() + File.separator + "Macro1.java"));
+        manager.setMacroPlacement(macro, StarDriverInsertedMacro.DriverPlacement.BEFOREMESH);  //There are 3 different places during a study that a macro can be played.
+        macro.getInputFile().setSource(HEEDSInFile.Source.STUDY);  //Tells heeds that the study directory will contain a file named Macro1.java and that this must be moved to each design directory.
+
 
         try {
-            proj.saveAs(new File(_sim.getSessionDir() + File.separator + "sweep.optm"));
+            proj.saveAs(new File(_sim.getSessionDir() + File.separator + "sweepWDesignSet.optm"));
             proj.writeInputFiles(true);
             run(proj);
             openPost();
