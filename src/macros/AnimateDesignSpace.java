@@ -59,6 +59,8 @@ import star.coremodule.ui.OkCancelSimulationDialog;
 import star.coremodule.ui.SimpleSimulationPanel;
 import star.coremodule.ui.SimulationPanel;
 import star.locale.annotation.StarDialog;
+import star.meshing.MeshOperationManager;
+import star.meshing.TransformPartsOperation;
 import star.starcad2.StarCadDesignParameterDouble;
 import star.starcad2.StarCadDocument;
 import star.starcad2.StarCadDocumentManager;
@@ -201,9 +203,9 @@ public class AnimateDesignSpace extends StarMacro {
             }
         }
 
-        for (Displayer d : scene.getDisplayerManager().getObjects()) {
-            d.setRepresentation(sim.getRepresentationManager().getObject("Geometry"));
-        }
+//        for (Displayer d : scene.getDisplayerManager().getObjects()) {
+//            d.setRepresentation(sim.getRepresentationManager().getObject("Geometry"));
+//        }
 
         scene.setCurrentView(prototype.getCurrentView());
 
@@ -371,22 +373,24 @@ public class AnimateDesignSpace extends StarMacro {
                 for (CadModel cm : cads) {
                     cm.updateParts();
                 }
+                TransformPartsOperation transformPartsOperation_0 = ((TransformPartsOperation) sim.get(MeshOperationManager.class).getObject("Casing Post"));
+                transformPartsOperation_0.execute();
 
-                StarCadDocumentManager manager = sim.get(StarCadDocumentManager.class);
-
-                for (StarCadDocument doc : manager.getObjects()) {
-                    scDoc = doc;
-                    if (scDoc.needsUpdate()) {
-                        scDoc.updateModel();
-                    }
-                }
+//                StarCadDocumentManager manager = sim.get(StarCadDocumentManager.class);
+//
+//                for (StarCadDocument doc : manager.getObjects()) {
+//                    scDoc = doc;
+//                    if (scDoc.needsUpdate()) {
+//                        scDoc.updateModel();
+//                    }
+//                }
             } catch (Exception ex) {//CAD error
-                if (scDoc != null) {
-                    if (scDoc.isUpdateFailed()) {
-                        sim.println("Document failed to update: " + scDoc.getUpdateErrorCode().name());
+//                if (scDoc != null) {
+//                    if (scDoc.isUpdateFailed()) {
+//                        sim.println("Document failed to update: " + scDoc.getUpdateErrorCode().name());
                         printEx(ex);
-                    }
-                }
+//                    }
+//                }
                 return;
             }
 
